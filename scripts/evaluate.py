@@ -100,11 +100,11 @@ def main():
 
     print(f"n_eval = {int(cm.sum())}")
     print(f"accuracy = {acc:.4f}")
-    print(f"macro_f1 = {macro_f1:.4f}   <- chỉ số chính")
-    print("\nlớp  support  precision  recall    f1")
+    print(f"macro_f1 = {macro_f1:.4f}   <- chi so chinh")
+    print("\nclass  support  precision  recall    f1")
     for c in range(N_CLASSES):
         print(f"{c:>3d}  {int(cm[c].sum()):7d}  {prec[c]:9.4f}  {rec[c]:6.4f}  {f1[c]:6.4f}")
-    print("\nma trận nhầm lẫn (hàng = thật, cột = dự đoán):")
+    print("\nconfusion matrix (rows=true, cols=pred):")
     print(pd.DataFrame(cm).to_string())
 
     if args.out:
@@ -114,7 +114,7 @@ def main():
                    confusion_matrix=cm.tolist())
         with open(args.out, "w") as f:
             json.dump(res, f, indent=2)
-        print("\nđã ghi", args.out)
+        print("\nwritten", args.out)
 
 
 if __name__ == "__main__":

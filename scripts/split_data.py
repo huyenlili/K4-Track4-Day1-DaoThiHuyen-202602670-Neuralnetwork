@@ -26,10 +26,11 @@ N_TOTAL, N_TRAIN, N_EVAL = 581_012, 464_809, 116_203   # kiểm tra metadata kh�
 
 
 def main():
+    repo_root = Path(__file__).resolve().parents[1]
     ap = argparse.ArgumentParser()
-    ap.add_argument("--data", default="data/covtype.csv.gz")
-    ap.add_argument("--meta", default="data/split_metadata.csv")
-    ap.add_argument("--out", default="data/processed")
+    ap.add_argument("--data", default=str(repo_root / "data" / "covtype.csv.gz"))
+    ap.add_argument("--meta", default=str(repo_root / "data" / "split_metadata.csv"))
+    ap.add_argument("--out", default=str(repo_root / "data" / "processed"))
     args = ap.parse_args()
 
     df = pd.read_csv(args.data)
@@ -56,15 +57,16 @@ def main():
         y = (part[LABEL].to_numpy() - 1).astype(np.int64)
         np.savez_compressed(out / f"{name}.npz", X=X, y=y, row_id=ids.astype(np.int64),
                             feature_names=np.array(feature_names))
-        print(f"{name:5s}: X {X.shape} {X.dtype}, y {y.shape} {y.dtype}, nhãn {y.min()}..{y.max()} -> {out / (name + '.npz')}")
+        print(f"{name:5s}: X {X.shape} {X.dtype}, y {y.shape} {y.dtype}, label range {y.min()}..{y.max()} -> {out / (name + '.npz')}")
 
-    # ---- thống kê để bạn đối chiếu
-    tr = np.load(out / "train.npz")["y"]; ev = np.load(out / "eval.npz")["y"]
+    # ---- statistics for verification
+    tr = np.load(out / "train.npz")["y"]
+    ev = np.load(out / "eval.npz")["y"]
     ctr, cev = np.bincount(tr, minlength=7), np.bincount(ev, minlength=7)
-    print("\nlớp   train(%)   eval(%)")
+    print("\nclass   train(%)   eval(%)")
     for c in range(7):
-        print(f"{c:>3d}   {100*ctr[c]/ctr.sum():7.3f}   {100*cev[c]/cev.sum():7.3f}")
-    print(f"\nđoán luôn lớp đa số (lớp {ctr.argmax()}) cho accuracy trên eval = {cev[ctr.argmax()]/cev.sum():.4f}")
+        print(f"{c:>3d}   {100 * ctr[c] / ctr.sum():7.3f}   {100 * cev[c] / cev.sum():7.3f}")
+    print(f"\nmajority-class baseline (label {ctr.argmax()}) on eval accuracy = {cev[ctr.argmax()] / cev.sum():.4f}")
 
 
 if __name__ == "__main__":
